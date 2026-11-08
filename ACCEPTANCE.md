@@ -12,6 +12,18 @@ Checks complete. No errors found.
 
 允许进入 `v0.1.0` 发布阶段。
 
+## 发布结果
+
+- GitHub 公开仓库：<https://github.com/haijun954-blip/update-guardian>
+- GitHub Release：<https://github.com/haijun954-blip/update-guardian/releases/tag/v0.1.0>
+- 正式安装包：<https://github.com/haijun954-blip/update-guardian/releases/download/v0.1.0/update-guardian-0.1.0.zip>
+- Release 状态：正式发布，非草稿，非预发布
+- 线上安装包大小：47,366 字节
+- 线上安装包 SHA-256：`0BC5A6C421AAC6CCA14D9530CB043E51BB873C537F09BCE3057C52360F37E84A`
+- 线上安装包哈希与本地产物：一致
+
+WordPress.org 插件目录尚未提交。该渠道需要单独的 WordPress.org 登录账号和审核流程。
+
 ## 验收环境
 
 - WordPress 6.8
