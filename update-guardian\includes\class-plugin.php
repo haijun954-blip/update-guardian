@@ -185,7 +185,7 @@ class Update_Guardian_Plugin {
 	public function plugin_action_links( $links ) {
 		array_unshift(
 			$links,
-			'<a href="' . esc_url( admin_url( 'admin.php?page=update-guardian' ) ) . '">' . esc_html__( '更新防护', 'update-guardian' ) . '</a>'
+			'<a href="' . esc_url( admin_url( 'admin.php?page=update-guardian' ) ) . '">' . esc_html__( 'Update Guard', 'update-guardian' ) . '</a>'
 		);
 		return $links;
 	}

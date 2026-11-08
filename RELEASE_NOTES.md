@@ -1,28 +1,37 @@
 # Update Guardian v0.1.0
 
-首个公开测试版本。
+The first public release of Update Guardian.
 
-## 功能
+## Added
 
-- WordPress 插件更新前自动创建文件快照。
-- 记录插件版本、更新时间、更新批次和快照状态。
-- 根据 PHP 致命错误、浏览器脚本错误、HTTP 状态、空白页、致命错误提示和 UTF-8 异常计算故障风险。
-- 支持单个插件一键回滚。
-- 支持回滚同一批次更新的多个插件。
-- 故障版本移入隔离目录。
-- 提供不依赖普通插件加载顺序的紧急恢复入口。
-- 恢复令牌单次有效。
-- 支持设置邮件通知、监控窗口、快照留存天数和最大快照数量。
+- Plugin file snapshots before WordPress updates.
+- Version, timestamp, and update-batch records.
+- PHP fatal error and browser script error evidence.
+- Home page and REST API health checks.
+- Risk scoring for recently updated plugins.
+- Single plugin and batch rollback.
+- Quarantine for faulty plugin files.
+- A single-use emergency recovery entry point.
+- Email recovery links, monitoring, and snapshot retention settings.
+- English administrator interface and WordPress.org documentation.
 
-## 验证
+## Compatibility
 
-- WordPress 6.8 / PHP 8.3 安装和功能测试通过。
-- 官方 Plugin Check 2.2.0：`Checks complete. No errors found.`
-- GPLv2 or later。
+- WordPress 6.0 or later
+- PHP 7.4 or later
+- WordPress 7.1 tested
 
-## 已知限制
+## Validation
 
-- 不自动撤销数据库迁移。
-- 不追踪手动文件覆盖式更新。
-- 不包含截图级视觉回归比较。
+- WordPress official Plugin Check 2.2.0: `Checks complete. No errors found.`
+- PHP syntax validation: passed for all PHP files.
+- JavaScript syntax validation: passed.
+- Snapshot creation and English emergency rollback: passed.
+
+## Limitations
+
+- Database migrations are not reversed.
+- SFTP, Git, and control-panel file replacements are not intercepted.
+- Screenshot-based visual regression testing is not included.
+- Theme and WordPress core updates are not covered in version 0.1.0.
 

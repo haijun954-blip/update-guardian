@@ -1,57 +1,83 @@
-# Update Guardian（更新守护）
+# Update Guardian
 
-面向 WordPress 的插件更新安全与快速回滚工具。它在插件更新前保存文件快照，更新后收集错误证据和站点健康状态，并在后台提供单插件或整批回滚。对于导致后台或 Elementor 无法打开的严重故障，还提供独立的紧急恢复入口。
+Update Guardian helps WordPress administrators recover from plugin updates that break the site. It saves the previous plugin files before an update, collects evidence after the update, and gives you a rollback action from WordPress admin.
 
-当前版本：`0.1.0`  
-最低环境：WordPress 6.0、PHP 7.4
+Use Update Guardian when an update causes:
 
-## 核心能力
+- character corruption or encoding problems
+- broken layouts
+- Elementor editor failures
+- missing features or runtime errors
+- a blank page or WordPress critical error
 
-1. **更新前快照**
-   - 拦截 WordPress 内置的插件更新流程。
-   - 保存插件目录、版本、文件数和大小。
-   - 默认在快照失败时阻止更新，避免无路可退。
-2. **故障插件识别**
-   - PHP 致命错误按真实文件路径定位插件。
-   - 管理员浏览器中的 JavaScript 和资源错误按插件资源路径定位。
-   - 更新后自动探测首页和 REST API，检查 HTTP 错误、空白页、致命错误提示、UTF-8 异常与常见乱码字符。
-   - 风险分数同时考虑错误证据、更新批次、更新时间和站点健康状态。
-3. **一键回滚**
-   - 恢复单个插件到更新前版本。
-   - 一次回滚同一批次更新的多个插件。
-   - 当前故障版本移入隔离目录，不直接删除。
-4. **紧急恢复**
-   - 激活时安装一个极小的 must-use 插件。
-   - 即使普通插件在加载阶段触发致命错误，也能在后台不可用时打开带令牌的恢复页面。
-   - 恢复令牌单次有效，可在后台重新生成。
+The plugin is designed for WordPress site administrators who need a fast local recovery path without waiting for a hosting provider or editing files over SFTP.
 
-## 安装
+## Requirements
 
-1. 在 WordPress 后台进入“插件 > 安装插件 > 上传插件”。
-2. 上传 `update-guardian-0.1.0.zip` 并启用。
-3. 在左侧菜单打开“更新守护”，确认“紧急恢复”显示“已就绪”。
-4. 通过 WordPress 正常执行一次插件更新，检查快照、状态和回滚入口是否出现。
+- WordPress 6.0 or later
+- PHP 7.4 or later
+- Write access to `wp-content`
+- PHP `ZipArchive` for compressed snapshots
 
-建议在测试站先验证主机是否具备以下条件：
+Without `ZipArchive`, Update Guardian uses an uncompressed snapshot directory. Confirm that your web server blocks direct access to `wp-content/update-guardian/`.
 
-- PHP `ZipArchive` 扩展可用。
-- WordPress 可以写入 `wp-content/update-guardian`。
-- 主机允许站点向自身首页发起回环 HTTP 请求。
-- 管理员邮箱可以正常发送和接收邮件。
+## Install
 
-## 回滚流程
+1. In WordPress admin, open **Plugins > Add New Plugin**.
+2. Select **Upload Plugin** and choose `update-guardian-0.1.0.zip`.
+3. Install and activate the plugin.
+4. Open **Update Guardian** and confirm that **Emergency recovery** shows **Ready**.
+5. Run one plugin update on a staging site and verify that the snapshot and rollback action appear.
 
-1. 更新前，插件读取旧版本并创建快照。
-2. 更新完成后，系统记录新旧版本，并在两分钟后执行健康检查。
-3. 管理员访问后台或前台时，如果插件目录内发生 JavaScript 错误，会自动上传可定位的错误证据。
-4. PHP 致命错误由 must-use 插件在请求结束时捕获并关联到最近更新的插件。
-5. 在“更新守护 > 更新记录”中点击“一键回滚”；同一批次有多个插件时可以使用“回滚整批”。
+## How it works
 
-## 数据与安全
+1. Before a plugin update, Update Guardian copies the installed plugin directory.
+2. After the update, it records the old and new versions.
+3. It checks the home page and REST API for HTTP errors, blank responses, critical errors, and invalid UTF-8.
+4. It captures PHP fatal errors and browser script errors when they can be traced to a plugin path.
+5. It calculates a risk score from the available evidence and update timing.
+6. You can restore the previous files from the **Updates** tab.
 
-- 快照默认存储在 `wp-content/update-guardian/backups/`。
-- 目录内会写入 `.htaccess`、`web.config` 和 `index.php`，阻止 Apache/IIS 直接访问。
-- Nginx 站点应额外配置：
+If several plugins were updated in one request, use **Roll back batch** to restore the whole batch.
+
+## Emergency recovery
+
+Update Guardian installs a small must-use plugin. The must-use plugin loads before regular WordPress plugins and provides a token-protected recovery page.
+
+Use this entry point when a failed update prevents you from opening WordPress admin:
+
+1. Open the recovery link sent to the administrator email.
+2. Confirm the plugin and version shown on the page.
+3. Select **Restore the previous version**.
+4. Refresh the site after the success message appears.
+
+Each recovery link is single-use. You can also generate a new link from the update record in WordPress admin.
+
+## Settings
+
+The default settings work for most sites.
+
+- **Block the plugin update:** stops an update when Update Guardian cannot create a snapshot.
+- **PHP fatal errors:** records fatal errors that can be associated with a recent plugin update.
+- **Plugin script errors:** records browser errors reported by signed-in administrators.
+- **Monitoring window:** controls how long errors remain associated with a recent update.
+- **Email an emergency recovery link:** sends recovery links to the site administrator after updates.
+- **Retention days:** removes old snapshots after the configured period.
+- **Maximum snapshots:** limits the number of stored snapshots.
+
+## Data and privacy
+
+Update Guardian runs on your WordPress site. It does not send plugin files, error messages, or site data to an external service.
+
+Snapshots are stored in:
+
+```text
+wp-content/update-guardian/backups/
+```
+
+The plugin adds `.htaccess`, `web.config`, and `index.php` protection files to the storage directory.
+
+For Nginx, add this rule:
 
 ```nginx
 location ^~ /wp-content/update-guardian/ {
@@ -60,36 +86,54 @@ location ^~ /wp-content/update-guardian/ {
 }
 ```
 
-- 恢复链路校验单次令牌，不依赖普通 WordPress 插件先成功加载。
-- 数据库和事件记录只保存插件元数据、错误摘要和请求路径，不保存密码或令牌明文。
+Diagnostic records contain plugin metadata, error summaries, and request paths. Recovery tokens are stored as hashes.
 
-## 已知边界
+## Limitations
 
-- 当前只覆盖 WordPress 内置更新器。通过 SFTP、Git、主机面板或手动覆盖文件完成的更新不会被自动拦截。
-- 回滚对象是插件文件，不包含插件在更新期间执行的数据库迁移、远程 SaaS 配置变更或第三方缓存。
-- 视觉差异识别尚未加入截图对比。当前版本能捕获明确错误和页面响应异常，但不能证明每一处像素级布局变化。
-- 复杂站点可能存在主题、插件与缓存共同作用的问题。风险分数用于排序排查，不应替代人工确认。
-- 单机回环请求可能被 CDN、WAF 或主机策略拦截；此时健康检查会显示“无法自检”，但错误证据与手动回滚仍可使用。
+- Update Guardian restores plugin files. It does not reverse database migrations, remote configuration changes, or cache changes performed by an update.
+- Updates made through SFTP, Git, a hosting control panel, or manual file replacement are not intercepted.
+- The current release does not perform screenshot-based visual regression testing.
+- A CDN, WAF, or host policy can block loopback requests. Update Guardian reports this condition instead of treating it as a healthy result.
+- Themes and WordPress core updates are not covered in version 0.1.0.
 
-## 建议的验收场景
+## Troubleshooting
 
-1. 更新一个普通插件，确认创建快照并显示版本变化。
-2. 把测试插件改成故意缺少类或函数，确认 PHP 致命错误能关联到该插件。
-3. 在测试页触发插件 JavaScript 异常，确认“错误证据”出现。
-4. 修改测试插件首页输出为无效 UTF-8，确认诊断给出乱码风险。
-5. 同时更新两个插件，确认“回滚整批”能恢复两项文件。
-6. 模拟后台完全无法访问，使用邮件中的紧急恢复链接完成回滚。
-7. 验证恢复后的插件版本、站点首页和管理员后台正常。
+### Emergency recovery is unavailable
 
-## 后续适配 SaaS
+Deactivate and reactivate Update Guardian. The plugin reinstalls the must-use recovery loader during activation.
 
-SaaS 产品没有统一的“插件目录”和更新钩子，不能直接复用 WordPress 的文件回滚机制。下一阶段应定义平台适配接口，例如：
+### Snapshot creation fails
 
-- 版本与部署事件采集
-- 部署前后制品快照
-- 配置与数据库迁移记录
-- 浏览器端错误、接口错误和视觉基线
-- 原子发布与流量切回
+Confirm that WordPress can write to `wp-content/update-guardian/` and that the account running PHP has enough storage.
 
-这意味着 SaaS 版本需要按目标平台分别接入，核心的诊断、风险评分和恢复编排可以复用。
+### Health checks cannot reach the site
+
+Confirm that the host allows loopback HTTP requests to the site URL. Error evidence and manual rollback still work when loopback checks are blocked.
+
+### A rollback reports a file permission error
+
+The web server user must be able to rename directories inside `wp-content/plugins/`. Correct the ownership or permissions and retry the rollback.
+
+## Development
+
+The plugin has no Composer or Node dependencies at runtime. PHP follows the WordPress coding style.
+
+Release validation includes:
+
+- WordPress official Plugin Check
+- PHP syntax validation for every PHP file
+- JavaScript syntax validation
+- plugin activation on a clean WordPress site
+- snapshot restoration through admin and the emergency entry point
+- Chinese and English locale checks
+
+## Support
+
+Report bugs and feature requests through the GitHub issue tracker:
+
+<https://github.com/haijun954-blip/update-guardian/issues>
+
+## License
+
+Update Guardian is licensed under GPLv2 or later.
 

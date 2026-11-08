@@ -20,7 +20,7 @@ class Update_Guardian_Recovery_Service {
 		$target = UPDATE_GUARDIAN_MU_PLUGIN;
 
 		if ( ! is_file( $source ) ) {
-			return new WP_Error( 'update_guardian_mu_source', __( '紧急恢复模板不存在。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_mu_source', __( 'The emergency recovery template does not exist.', 'update-guardian' ) );
 		}
 
 		if ( file_exists( $target ) ) {
@@ -28,17 +28,17 @@ class Update_Guardian_Recovery_Service {
 			if ( false === strpos( $existing, self::MU_MARKER ) ) {
 				return new WP_Error(
 					'update_guardian_mu_conflict',
-					__( '紧急恢复文件已存在且不属于更新守护，未覆盖。', 'update-guardian' )
+					__( 'An emergency recovery file already exists and is not owned by Update Guardian. It was not overwritten.', 'update-guardian' )
 				);
 			}
 		}
 
 		if ( ! wp_mkdir_p( dirname( $target ) ) ) {
-			return new WP_Error( 'update_guardian_mu_dir', __( '无法创建 must-use 插件目录。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_mu_dir', __( 'Could not create the must-use plugin directory.', 'update-guardian' ) );
 		}
 
 		if ( ! copy( $source, $target ) ) {
-			return new WP_Error( 'update_guardian_mu_copy', __( '无法安装紧急恢复入口。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_mu_copy', __( 'Could not install the emergency recovery entry point.', 'update-guardian' ) );
 		}
 
 		@chmod( $target, 0644 );
@@ -74,7 +74,7 @@ class Update_Guardian_Recovery_Service {
 		$event      = $repository->find( $event_id );
 
 		if ( ! $event || empty( $event['backup_id'] ) || 'rolled_back' === $event['status'] ) {
-			return new WP_Error( 'update_guardian_recovery_unavailable', __( '该更新没有可用的回滚快照。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_recovery_unavailable', __( 'No rollback snapshot is available for this update.', 'update-guardian' ) );
 		}
 
 		try {
@@ -117,7 +117,7 @@ class Update_Guardian_Recovery_Service {
 		if ( is_wp_error( $event ) ) {
 			status_header( 403 );
 			self::render_message(
-				__( '恢复链接无效', 'update-guardian' ),
+				__( 'Invalid recovery link', 'update-guardian' ),
 				$event->get_error_message(),
 				'error'
 			);
@@ -130,8 +130,8 @@ class Update_Guardian_Recovery_Service {
 			if ( empty( $submitted_csrf ) || ! hash_equals( $expected_csrf, $submitted_csrf ) ) {
 				status_header( 403 );
 				self::render_message(
-					__( '确认信息已失效', 'update-guardian' ),
-					__( '请重新打开恢复链接后再试。', 'update-guardian' ),
+					__( 'Confirmation expired', 'update-guardian' ),
+					__( 'Open the recovery link again and retry.', 'update-guardian' ),
 					'error',
 					$event
 				);
@@ -142,7 +142,7 @@ class Update_Guardian_Recovery_Service {
 			if ( is_wp_error( $result ) ) {
 				status_header( 500 );
 				self::render_message(
-					__( '回滚未完成', 'update-guardian' ),
+					__( 'Rollback was not completed', 'update-guardian' ),
 					$result->get_error_message(),
 					'error',
 					$event
@@ -154,7 +154,7 @@ class Update_Guardian_Recovery_Service {
 			$repository->update_restore_state(
 				$event_id,
 				'rolled_back',
-				sprintf( __( '已通过紧急恢复入口回滚到 %s。', 'update-guardian' ), $result['version'] )
+				sprintf( __( 'Rolled back to %s through the emergency recovery entry point.', 'update-guardian' ), $result['version'] )
 			);
 			$repository->set_recovery_token_hash( $event_id, '' );
 
@@ -166,9 +166,9 @@ class Update_Guardian_Recovery_Service {
 			}
 
 			self::render_message(
-				__( '回滚已完成', 'update-guardian' ),
+				__( 'Rollback complete', 'update-guardian' ),
 				sprintf(
-					__( '%1$s 已恢复至 %2$s。故障版本已隔离，网站应会在刷新后恢复正常。', 'update-guardian' ),
+					__( '%1$s was restored to %2$s. The faulty version was quarantined. Refresh the site to continue.', 'update-guardian' ),
 					esc_html( $event['plugin_name'] ),
 					esc_html( $result['version'] )
 				),
@@ -263,20 +263,20 @@ class Update_Guardian_Recovery_Service {
 		$event      = $repository->find( $event_id );
 
 		if ( ! $event || empty( $event['recovery_token_hash'] ) || strlen( $token ) < 20 ) {
-			return new WP_Error( 'update_guardian_recovery_invalid', __( '链接不存在、已使用或已过期。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_recovery_invalid', __( 'The link does not exist, has already been used, or has expired.', 'update-guardian' ) );
 		}
 
 		$actual = hash( 'sha256', $token );
 		if ( ! hash_equals( $event['recovery_token_hash'], $actual ) ) {
-			return new WP_Error( 'update_guardian_recovery_invalid', __( '恢复令牌校验失败。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_recovery_invalid', __( 'Recovery token validation failed.', 'update-guardian' ) );
 		}
 
 		if ( 'rolled_back' === $event['status'] ) {
-			return new WP_Error( 'update_guardian_already_restored', __( '这个更新已经完成回滚。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_already_restored', __( 'This update has already been rolled back.', 'update-guardian' ) );
 		}
 
 		if ( empty( $event['backup_id'] ) ) {
-			return new WP_Error( 'update_guardian_no_backup', __( '此更新没有可用快照。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_no_backup', __( 'No snapshot is available for this update.', 'update-guardian' ) );
 		}
 
 		return $event;
@@ -324,11 +324,11 @@ class Update_Guardian_Recovery_Service {
 		);
 		?>
 		<!doctype html>
-		<html lang="zh-CN">
+		<html lang="en-US">
 		<head>
 			<meta charset="utf-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
-			<title><?php echo esc_html__( '插件紧急回滚', 'update-guardian' ); ?></title>
+			<title><?php echo esc_html__( 'Emergency Plugin Rollback', 'update-guardian' ); ?></title>
 			<style>
 				:root { color-scheme: light; --ink:#1d2327; --muted:#646970; --line:#dcdcde; --blue:#2271b1; --red:#b32d2e; --bg:#f6f7f7; }
 				* { box-sizing:border-box; }
@@ -347,21 +347,21 @@ class Update_Guardian_Recovery_Service {
 		</head>
 		<body>
 			<main>
-				<h1><?php echo esc_html__( '确认回滚插件更新', 'update-guardian' ); ?></h1>
-				<p><?php echo esc_html__( '此操作会恢复更新前的插件文件。当前故障版本会保留在隔离目录中，便于后续排查。', 'update-guardian' ); ?></p>
+				<h1><?php echo esc_html__( 'Confirm Plugin Update Rollback', 'update-guardian' ); ?></h1>
+				<p><?php echo esc_html__( 'This restores the plugin files from before the update. The faulty version remains in a quarantine directory for investigation.', 'update-guardian' ); ?></p>
 				<div class="meta">
-					<div><span><?php echo esc_html__( '插件', 'update-guardian' ); ?></span><strong><?php echo esc_html( $event['plugin_name'] ); ?></strong></div>
-					<div><span><?php echo esc_html__( '版本', 'update-guardian' ); ?></span><strong><?php echo esc_html( $event['old_version'] ); ?> → <?php echo esc_html( $event['new_version'] ); ?></strong></div>
-					<div><span><?php echo esc_html__( '更新批次', 'update-guardian' ); ?></span><code><?php echo esc_html( $event['batch_id'] ); ?></code></div>
+					<div><span><?php echo esc_html__( 'Plugin', 'update-guardian' ); ?></span><strong><?php echo esc_html( $event['plugin_name'] ); ?></strong></div>
+					<div><span><?php echo esc_html__( 'Version', 'update-guardian' ); ?></span><strong><?php echo esc_html( $event['old_version'] ); ?> → <?php echo esc_html( $event['new_version'] ); ?></strong></div>
+					<div><span><?php echo esc_html__( 'Update batch', 'update-guardian' ); ?></span><code><?php echo esc_html( $event['batch_id'] ); ?></code></div>
 				</div>
 				<form method="post" action="<?php echo esc_url( $form_url ); ?>">
 					<input type="hidden" name="ug_recovery_csrf" value="<?php echo esc_attr( self::csrf_token( (int) $event['id'], $token ) ); ?>">
 					<div class="actions">
-						<button type="submit" name="update_guardian_confirm_rollback" value="1"><?php echo esc_html__( '一键恢复到更新前', 'update-guardian' ); ?></button>
-						<a class="button secondary" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html__( '暂不处理', 'update-guardian' ); ?></a>
+						<button type="submit" name="update_guardian_confirm_rollback" value="1"><?php echo esc_html__( 'Restore the previous version', 'update-guardian' ); ?></button>
+						<a class="button secondary" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php echo esc_html__( 'Not now', 'update-guardian' ); ?></a>
 					</div>
 				</form>
-				<p class="note"><?php echo esc_html__( '插件自身执行的数据库迁移不会被自动撤销。如更新包含数据结构变化，请先保留数据库备份。', 'update-guardian' ); ?></p>
+				<p class="note"><?php echo esc_html__( 'This does not undo database migrations performed by the plugin. Keep a database backup when an update changes stored data.', 'update-guardian' ); ?></p>
 			</main>
 		</body>
 		</html>
@@ -398,7 +398,7 @@ class Update_Guardian_Recovery_Service {
 		$color = 'success' === $type ? '#008a20' : '#b32d2e';
 		?>
 		<!doctype html>
-		<html lang="zh-CN">
+		<html lang="en-US">
 		<head>
 			<meta charset="utf-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -418,7 +418,7 @@ class Update_Guardian_Recovery_Service {
 				<?php if ( $event ) : ?>
 					<p><strong><?php echo esc_html( $event['plugin_name'] ); ?></strong> <?php echo esc_html( $event['old_version'] ); ?> → <?php echo esc_html( $event['new_version'] ); ?></p>
 				<?php endif; ?>
-				<p><a href="<?php echo esc_url( $home_url ? $home_url : home_url( '/' ) ); ?>"><?php echo esc_html__( '返回网站', 'update-guardian' ); ?></a></p>
+				<p><a href="<?php echo esc_url( $home_url ? $home_url : home_url( '/' ) ); ?>"><?php echo esc_html__( 'Return to the site', 'update-guardian' ); ?></a></p>
 			</main>
 		</body>
 		</html>

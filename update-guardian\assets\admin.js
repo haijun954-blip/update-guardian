@@ -11,7 +11,7 @@
 		if (copyButton) {
 			var value = copyButton.getAttribute('data-update-guardian-copy') || '';
 			if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
-				window.prompt(copyButton.getAttribute('data-prompt-label') || '复制链接', value);
+				window.prompt(copyButton.getAttribute('data-prompt-label') || 'Copy link', value);
 				return;
 			}
 			navigator.clipboard.writeText(value).then(function () {
@@ -21,7 +21,7 @@
 					copyButton.textContent = original;
 				}, 1800);
 			}).catch(function () {
-				window.prompt(copyButton.getAttribute('data-prompt-label') || '复制链接', value);
+				window.prompt(copyButton.getAttribute('data-prompt-label') || 'Copy link', value);
 			});
 		}
 	});
@@ -86,13 +86,13 @@
 		var target = event.target;
 		if (target && target !== window && (target.src || target.href)) {
 			var resourceUrl = target.currentSrc || target.src || target.href;
-			send('resource', '资源加载失败：' + resourceUrl, resourceUrl, 0, 0, '');
+			send('resource', 'Failed to load resource: ' + resourceUrl, resourceUrl, 0, 0, '');
 			return;
 		}
 
 		send(
 			'error',
-			event.message || '未知 JavaScript 错误',
+			event.message || 'Unknown JavaScript error',
 			event.filename || '',
 			event.lineno || 0,
 			event.colno || 0,
@@ -104,7 +104,7 @@
 		var reason = event.reason || {};
 		send(
 			'rejection',
-			reason.message || String(reason) || '未处理的 Promise 异常',
+			reason.message || String(reason) || 'Unhandled Promise rejection',
 			reason.fileName || '',
 			reason.lineNumber || 0,
 			reason.columnNumber || 0,

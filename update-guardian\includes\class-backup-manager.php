@@ -24,7 +24,7 @@ class Update_Guardian_Backup_Manager {
 					'update_guardian_storage_error',
 					sprintf(
 						/* translators: %s: directory path */
-						__( '无法创建备份目录：%s', 'update-guardian' ),
+						__( 'Could not create the backup directory: %s', 'update-guardian' ),
 						$directory
 					)
 				);
@@ -85,14 +85,14 @@ class Update_Guardian_Backup_Manager {
 		}
 
 		if ( ! file_exists( $source['path'] ) ) {
-			return new WP_Error( 'update_guardian_missing_plugin', __( '找不到待备份的插件目录。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_missing_plugin', __( 'The plugin directory to back up could not be found.', 'update-guardian' ) );
 		}
 
 		$backup_id = self::new_backup_id( $source['slug'] );
 		$backup_dir = trailingslashit( UPDATE_GUARDIAN_STORAGE_DIR . '/backups' ) . $backup_id;
 
 		if ( ! wp_mkdir_p( $backup_dir ) ) {
-			return new WP_Error( 'update_guardian_backup_dir', __( '无法创建插件快照目录。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_backup_dir', __( 'Could not create the plugin snapshot directory.', 'update-guardian' ) );
 		}
 
 		$manifest = array(
@@ -132,7 +132,7 @@ class Update_Guardian_Backup_Manager {
 
 		if ( false === $written ) {
 			self::delete_directory( $backup_dir );
-			return new WP_Error( 'update_guardian_manifest_error', __( '无法写入插件快照清单。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_manifest_error', __( 'Could not write the plugin snapshot manifest.', 'update-guardian' ) );
 		}
 
 		self::protect_directory( $backup_dir );
@@ -149,7 +149,7 @@ class Update_Guardian_Backup_Manager {
 	 */
 	private static function plugin_root_path( $plugin_file, $allow_missing = false ) {
 		if ( validate_file( $plugin_file ) !== 0 ) {
-			return new WP_Error( 'update_guardian_invalid_plugin', __( '插件文件路径无效。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_invalid_plugin', __( 'The plugin file path is invalid.', 'update-guardian' ) );
 		}
 
 		$parts   = explode( '/', $plugin_file );
@@ -160,7 +160,7 @@ class Update_Guardian_Backup_Manager {
 		$base    = realpath( WP_PLUGIN_DIR );
 
 		if ( false === $base ) {
-			return new WP_Error( 'update_guardian_missing_plugin_root', __( '无法确认插件根目录。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_missing_plugin_root', __( 'Could not resolve the WordPress plugins root.', 'update-guardian' ) );
 		}
 
 		if ( false === $real && $allow_missing ) {
@@ -168,13 +168,13 @@ class Update_Guardian_Backup_Manager {
 		}
 
 		if ( false === $real ) {
-			return new WP_Error( 'update_guardian_missing_plugin', __( '找不到待备份的插件。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_missing_plugin', __( 'The plugin to back up could not be found.', 'update-guardian' ) );
 		}
 
 		$real = wp_normalize_path( $real );
 		$base = trailingslashit( wp_normalize_path( $base ) );
 		if ( 0 !== strpos( $real, $base ) ) {
-			return new WP_Error( 'update_guardian_plugin_outside_root', __( '插件路径超出允许范围。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_plugin_outside_root', __( 'The plugin path is outside the allowed directory.', 'update-guardian' ) );
 		}
 
 		$slug = $is_file ? basename( $plugin_file, '.php' ) : $parts[0];
@@ -210,7 +210,7 @@ class Update_Guardian_Backup_Manager {
 		$zip      = new ZipArchive();
 
 		if ( true !== $zip->open( $zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE ) ) {
-			return new WP_Error( 'update_guardian_zip_error', __( '无法创建 ZIP 快照。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_zip_error', __( 'Could not create the ZIP snapshot.', 'update-guardian' ) );
 		}
 
 		$count    = 0;
@@ -222,7 +222,7 @@ class Update_Guardian_Backup_Manager {
 			$relative = wp_basename( $source );
 			if ( ! $zip->addFile( $source, $relative ) ) {
 				$zip->close();
-				return new WP_Error( 'update_guardian_zip_add', __( '无法将插件文件加入快照。', 'update-guardian' ) );
+				return new WP_Error( 'update_guardian_zip_add', __( 'Could not add the plugin file to the snapshot.', 'update-guardian' ) );
 			}
 			$file_size = filesize( $source );
 			$bytes    += false === $file_size ? 0 : $file_size;
@@ -238,7 +238,7 @@ class Update_Guardian_Backup_Manager {
 				$path = $item->getPathname();
 
 				if ( $item->isLink() ) {
-					$warnings[] = sprintf( '跳过符号链接：%s', $path );
+					$warnings[] = sprintf( 'Skipped symbolic link: %s', $path );
 					continue;
 				}
 
@@ -254,7 +254,7 @@ class Update_Guardian_Backup_Manager {
 
 				if ( ! $item->isFile() || ! $zip->addFile( $path, $relative ) ) {
 					$zip->close();
-					return new WP_Error( 'update_guardian_zip_add', __( '读取插件文件时失败。', 'update-guardian' ) );
+					return new WP_Error( 'update_guardian_zip_add', __( 'Could not read a plugin file.', 'update-guardian' ) );
 				}
 
 				$file_size = $item->getSize();
@@ -265,7 +265,7 @@ class Update_Guardian_Backup_Manager {
 		}
 
 		if ( ! $zip->close() ) {
-			return new WP_Error( 'update_guardian_zip_close', __( '保存 ZIP 快照时失败。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_zip_close', __( 'Could not save the ZIP snapshot.', 'update-guardian' ) );
 		}
 
 		return array(
@@ -296,7 +296,7 @@ class Update_Guardian_Backup_Manager {
 
 		if ( is_file( $source ) ) {
 			if ( ! wp_mkdir_p( $payload ) || ! copy( $source, $payload . '/' . wp_basename( $source ) ) ) {
-				return new WP_Error( 'update_guardian_copy_error', __( '复制插件文件时失败。', 'update-guardian' ) );
+				return new WP_Error( 'update_guardian_copy_error', __( 'Could not copy the plugin file.', 'update-guardian' ) );
 			}
 			$stats['file_count'] = 1;
 			$stats['byte_count'] = (int) filesize( $source );
@@ -328,12 +328,12 @@ class Update_Guardian_Backup_Manager {
 	 */
 	private static function copy_tree( $source, $destination, array &$stats ) {
 		if ( ! wp_mkdir_p( $destination ) ) {
-			return new WP_Error( 'update_guardian_copy_dir', __( '无法创建快照子目录。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_copy_dir', __( 'Could not create a snapshot subdirectory.', 'update-guardian' ) );
 		}
 
 		$items = scandir( $source );
 		if ( false === $items ) {
-			return new WP_Error( 'update_guardian_read_dir', __( '无法读取插件目录。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_read_dir', __( 'Could not read the plugin directory.', 'update-guardian' ) );
 		}
 
 		foreach ( $items as $item ) {
@@ -345,7 +345,7 @@ class Update_Guardian_Backup_Manager {
 			$dest_path   = trailingslashit( $destination ) . $item;
 
 			if ( is_link( $source_path ) ) {
-				$stats['warnings'][] = sprintf( '跳过符号链接：%s', $source_path );
+				$stats['warnings'][] = sprintf( 'Skipped symbolic link: %s', $source_path );
 				continue;
 			}
 
@@ -358,7 +358,7 @@ class Update_Guardian_Backup_Manager {
 			}
 
 			if ( ! is_file( $source_path ) || ! copy( $source_path, $dest_path ) ) {
-				return new WP_Error( 'update_guardian_copy_file', __( '复制插件文件时失败。', 'update-guardian' ) );
+				return new WP_Error( 'update_guardian_copy_file', __( 'Could not copy a plugin file.', 'update-guardian' ) );
 			}
 
 			$size = filesize( $source_path );
@@ -384,7 +384,7 @@ class Update_Guardian_Backup_Manager {
 
 		$backup_id = isset( $event['backup_id'] ) ? sanitize_text_field( $event['backup_id'] ) : '';
 		if ( empty( $backup_id ) ) {
-			return new WP_Error( 'update_guardian_no_backup', __( '此更新没有可用快照。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_no_backup', __( 'No snapshot is available for this update.', 'update-guardian' ) );
 		}
 
 		$backup_dir = trailingslashit( UPDATE_GUARDIAN_STORAGE_DIR . '/backups' ) . $backup_id;
@@ -394,7 +394,7 @@ class Update_Guardian_Backup_Manager {
 		}
 
 		if ( ! empty( $event['plugin_file'] ) && $manifest['plugin_file'] !== $event['plugin_file'] ) {
-			return new WP_Error( 'update_guardian_manifest_mismatch', __( '快照与更新记录不匹配。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_manifest_mismatch', __( 'The snapshot does not match the update record.', 'update-guardian' ) );
 		}
 
 		$target = self::plugin_root_path( $manifest['plugin_file'], true );
@@ -425,13 +425,13 @@ class Update_Guardian_Backup_Manager {
 
 		if ( ! file_exists( $temp_target ) ) {
 			self::delete_temporary_path( $temp_root );
-			return new WP_Error( 'update_guardian_restore_payload', __( '快照内容不完整，未执行回滚。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_restore_payload', __( 'The snapshot is incomplete. No files were restored.', 'update-guardian' ) );
 		}
 
 		$quarantine_root = trailingslashit( UPDATE_GUARDIAN_STORAGE_DIR . '/quarantine' ) . $backup_id . '-' . $suffix;
 		if ( ! wp_mkdir_p( $quarantine_root ) ) {
 			self::delete_temporary_path( $temp_root );
-			return new WP_Error( 'update_guardian_quarantine', __( '无法创建故障版本隔离目录。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_quarantine', __( 'Could not create the quarantine directory for the faulty version.', 'update-guardian' ) );
 		}
 
 		$quarantine_target = trailingslashit( $quarantine_root ) . $target['root_name'];
@@ -440,7 +440,7 @@ class Update_Guardian_Backup_Manager {
 		if ( $had_existing_target && ! @rename( $target['path'], $quarantine_target ) ) {
 			self::delete_temporary_path( $temp_root );
 			self::delete_directory( $quarantine_root );
-			return new WP_Error( 'update_guardian_move_current', __( '无法移动当前故障版本，请检查文件权限。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_move_current', __( 'Could not move the current faulty version. Check file permissions.', 'update-guardian' ) );
 		}
 
 		if ( ! @rename( $temp_target, $target['path'] ) ) {
@@ -449,7 +449,7 @@ class Update_Guardian_Backup_Manager {
 			}
 			self::delete_temporary_path( $temp_root );
 			self::delete_directory( $quarantine_root );
-			return new WP_Error( 'update_guardian_move_restore', __( '无法安装回滚版本，已尝试恢复现场。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_move_restore', __( 'Could not install the rollback version. The original files were restored.', 'update-guardian' ) );
 		}
 
 		self::delete_temporary_path( $temp_root );
@@ -477,18 +477,18 @@ class Update_Guardian_Backup_Manager {
 	 */
 	private static function extract_zip( $zip_path, $destination ) {
 		if ( ! class_exists( 'ZipArchive' ) || ! is_file( $zip_path ) ) {
-			return new WP_Error( 'update_guardian_zip_missing', __( '快照 ZIP 不存在或无法读取。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_zip_missing', __( 'The snapshot ZIP is missing or unreadable.', 'update-guardian' ) );
 		}
 
 		if ( ! wp_mkdir_p( $destination ) ) {
-			return new WP_Error( 'update_guardian_restore_dir', __( '无法创建临时恢复目录。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_restore_dir', __( 'Could not create a temporary restore directory.', 'update-guardian' ) );
 		}
 
 		$zip = new ZipArchive();
 		if ( true !== $zip->open( $zip_path ) || ! $zip->extractTo( $destination ) ) {
 			$zip->close();
 			self::delete_temporary_path( $destination );
-			return new WP_Error( 'update_guardian_extract_error', __( '解压插件快照失败。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_extract_error', __( 'Could not extract the plugin snapshot.', 'update-guardian' ) );
 		}
 		$zip->close();
 
@@ -504,12 +504,12 @@ class Update_Guardian_Backup_Manager {
 	private static function read_manifest( $backup_dir ) {
 		$path = trailingslashit( $backup_dir ) . 'manifest.json';
 		if ( ! is_file( $path ) ) {
-			return new WP_Error( 'update_guardian_manifest_missing', __( '快照清单不存在。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_manifest_missing', __( 'The snapshot manifest does not exist.', 'update-guardian' ) );
 		}
 
 		$manifest = json_decode( (string) file_get_contents( $path ), true );
 		if ( ! is_array( $manifest ) || empty( $manifest['plugin_file'] ) || empty( $manifest['backup_type'] ) || empty( $manifest['payload'] ) ) {
-			return new WP_Error( 'update_guardian_manifest_invalid', __( '快照清单无效。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_manifest_invalid', __( 'The snapshot manifest is invalid.', 'update-guardian' ) );
 		}
 
 		return $manifest;

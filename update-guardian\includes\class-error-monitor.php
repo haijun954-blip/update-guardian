@@ -135,7 +135,7 @@ class Update_Guardian_Error_Monitor {
 		$count     = (int) get_transient( $limit_key );
 
 		if ( $count >= 30 ) {
-			return new WP_Error( 'update_guardian_rate_limited', __( '诊断请求过于频繁。', 'update-guardian' ), array( 'status' => 429 ) );
+			return new WP_Error( 'update_guardian_rate_limited', __( 'Too many diagnostic requests.', 'update-guardian' ), array( 'status' => 429 ) );
 		}
 		set_transient( $limit_key, $count + 1, HOUR_IN_SECONDS );
 
@@ -145,7 +145,7 @@ class Update_Guardian_Error_Monitor {
 		$key     = sanitize_key( (string) $request->get_param( 'error_key' ) );
 
 		if ( '' === $message ) {
-			return new WP_Error( 'update_guardian_empty_error', __( '错误内容为空。', 'update-guardian' ), array( 'status' => 400 ) );
+			return new WP_Error( 'update_guardian_empty_error', __( 'The error message is empty.', 'update-guardian' ), array( 'status' => 400 ) );
 		}
 
 		$dedupe_key = 'ug_js_seen_' . $user_id . '_' . md5( $key . '|' . $message . '|' . $source );

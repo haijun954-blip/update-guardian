@@ -86,7 +86,7 @@ class Update_Guardian_Update_Monitor {
 						'update_guardian_snapshot_failed',
 						sprintf(
 							/* translators: 1: plugin name, 2: error message */
-							__( '“%1$s”的更新已阻止，因为无法创建安全快照：%2$s', 'update-guardian' ),
+							__( 'The update for "%1$s" was blocked because a safe snapshot could not be created: %2$s', 'update-guardian' ),
 							$name,
 							$snapshot->get_error_message()
 						)
@@ -126,7 +126,7 @@ class Update_Guardian_Update_Monitor {
 					'update_guardian_event_failed',
 					sprintf(
 						/* translators: 1: plugin name, 2: error message */
-						__( '“%1$s”的更新已阻止，因为无法登记回滚记录：%2$s', 'update-guardian' ),
+						__( 'The update for "%1$s" was blocked because its rollback record could not be saved: %2$s', 'update-guardian' ),
 						$name,
 						$result->get_error_message()
 					)
@@ -239,9 +239,9 @@ class Update_Guardian_Update_Monitor {
 		}
 
 		$lines   = array();
-		$lines[] = sprintf( __( '%s 刚刚完成了插件更新。', 'update-guardian' ), wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) );
+		$lines[] = sprintf( __( '%s has just completed a plugin update.', 'update-guardian' ), wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) );
 		$lines[] = '';
-		$lines[] = __( '如果更新后出现乱码、布局错乱、Elementor 无法打开或功能失效，可使用以下紧急恢复链接：', 'update-guardian' );
+		$lines[] = __( 'If the site shows character corruption, broken layout, an Elementor editor failure, or a missing feature after the update, use these emergency recovery links:', 'update-guardian' );
 		$lines[] = '';
 
 		foreach ( $rows as $row ) {
@@ -250,17 +250,17 @@ class Update_Guardian_Update_Monitor {
 			if ( ! is_wp_error( $url ) ) {
 				$lines[] = $url;
 			} else {
-				$lines[] = __( '恢复链接生成失败，请登录 WordPress 后台处理。', 'update-guardian' );
+				$lines[] = __( 'The recovery link could not be generated. Sign in to WordPress admin to continue.', 'update-guardian' );
 			}
 			$lines[] = '';
 		}
 
-		$lines[] = __( '此链接会在使用后失效。若网站仍可进入后台，可直接在“更新守护”页面点击回滚。', 'update-guardian' );
+		$lines[] = __( 'Each link becomes invalid after use. If WordPress admin is still available, you can roll back from the Update Guardian screen.', 'update-guardian' );
 		$lines[] = admin_url( 'admin.php?page=update-guardian' );
 
 		wp_mail(
 			$admin_email,
-			sprintf( __( '[%s] 插件更新完成，安全快照已保存', 'update-guardian' ), wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) ),
+			sprintf( __( '[%s] Plugin update complete with a saved safety snapshot', 'update-guardian' ), wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) ),
 			implode( "\n", $lines )
 		);
 	}

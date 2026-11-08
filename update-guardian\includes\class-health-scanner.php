@@ -61,7 +61,7 @@ class Update_Guardian_Health_Scanner {
 		if ( empty( $events ) ) {
 			return array(
 				'status'  => 'idle',
-				'message' => __( '没有需要检查的更新。', 'update-guardian' ),
+				'message' => __( 'No updates need a health check.', 'update-guardian' ),
 			);
 		}
 
@@ -74,7 +74,7 @@ class Update_Guardian_Health_Scanner {
 
 		$summary = array(
 			'status'   => 'healthy',
-			'message'  => __( '未发现明显异常。', 'update-guardian' ),
+			'message'  => __( 'No obvious problems were found.', 'update-guardian' ),
 			'checked'  => 0,
 			'failed'   => 0,
 			'warnings' => 0,
@@ -90,11 +90,11 @@ class Update_Guardian_Health_Scanner {
 				if ( $error_count > 0 ) {
 					$message = $latest && ! empty( $latest['message'] )
 						? $latest['message']
-						: __( '检测到该插件产生错误。', 'update-guardian' );
+						: __( 'This plugin produced an error after the update.', 'update-guardian' );
 					$this->repository->update_health( (int) $event['id'], 'failed', 95, $message );
 					$summary['failed']++;
 					$summary['status'] = 'failed';
-					$summary['message'] = __( '检测到插件运行错误，建议回滚。', 'update-guardian' );
+					$summary['message'] = __( 'A plugin runtime error was detected. Rollback is recommended.', 'update-guardian' );
 				} elseif ( 'failed' === $probe['status'] ) {
 					$risk = count( $group ) > 1 ? max( 20, 55 - ( $index * 8 ) ) : 60;
 					$this->repository->update_health( (int) $event['id'], 'failed', $risk, $probe['message'] );
@@ -149,7 +149,7 @@ class Update_Guardian_Health_Scanner {
 		if ( is_wp_error( $front ) ) {
 			return array(
 				'status'  => 'unknown',
-				'message' => __( '服务器无法自检首页，可能是主机禁止回环请求。', 'update-guardian' ),
+				'message' => __( 'The server could not probe its own home page. The host may block loopback requests.', 'update-guardian' ),
 			);
 		}
 
@@ -159,28 +159,28 @@ class Update_Guardian_Health_Scanner {
 		if ( $code >= 500 ) {
 			return array(
 				'status'  => 'failed',
-				'message' => sprintf( __( '更新后首页返回 HTTP %d。', 'update-guardian' ), $code ),
+				'message' => sprintf( __( 'The home page returned HTTP %d after the update.', 'update-guardian' ), $code ),
 			);
 		}
 
 		if ( strlen( $body ) < 200 ) {
 			return array(
 				'status'  => 'failed',
-				'message' => __( '更新后首页内容接近空白，可能发生了致命错误。', 'update-guardian' ),
+				'message' => __( 'The home page is nearly blank after the update. A fatal error may have occurred.', 'update-guardian' ),
 			);
 		}
 
 		if ( preg_match( '/There has been a critical error|致命错误/i', $body ) ) {
 			return array(
 				'status'  => 'failed',
-				'message' => __( '首页出现 WordPress 致命错误提示。', 'update-guardian' ),
+				'message' => __( 'The home page shows a WordPress critical error.', 'update-guardian' ),
 			);
 		}
 
 		if ( function_exists( 'mb_check_encoding' ) && ! mb_check_encoding( $body, 'UTF-8' ) ) {
 			return array(
 				'status'  => 'failed',
-				'message' => __( '首页响应不是有效的 UTF-8 编码，可能存在乱码。', 'update-guardian' ),
+				'message' => __( 'The home page is not valid UTF-8. Character corruption is likely.', 'update-guardian' ),
 			);
 		}
 
@@ -188,14 +188,14 @@ class Update_Guardian_Health_Scanner {
 		if ( preg_match( '/锟斤拷|ï¿½|â€|Ã[\x{0080}-\x{00BF}]/u', $text ) ) {
 			return array(
 				'status'  => 'warning',
-				'message' => __( '首页检测到疑似乱码字符，建议检查编码与语言包。', 'update-guardian' ),
+				'message' => __( 'The home page contains characters associated with encoding corruption. Check the site encoding and language files.', 'update-guardian' ),
 			);
 		}
 
 		if ( false === stripos( $body, '</html>' ) ) {
 			return array(
 				'status'  => 'warning',
-				'message' => __( '首页 HTML 结构不完整，可能被错误或插件输出中断。', 'update-guardian' ),
+				'message' => __( 'The home page HTML is incomplete. An error or plugin output may have interrupted it.', 'update-guardian' ),
 			);
 		}
 
@@ -213,14 +213,14 @@ class Update_Guardian_Health_Scanner {
 			if ( $rest_code >= 500 ) {
 				return array(
 					'status'  => 'failed',
-					'message' => sprintf( __( 'WordPress REST API 返回 HTTP %d。', 'update-guardian' ), $rest_code ),
+					'message' => sprintf( __( 'The WordPress REST API returned HTTP %d.', 'update-guardian' ), $rest_code ),
 				);
 			}
 		}
 
 		return array(
 			'status'  => 'healthy',
-			'message' => __( '首页与 REST API 响应正常。', 'update-guardian' ),
+			'message' => __( 'The home page and REST API respond normally.', 'update-guardian' ),
 		);
 	}
 }

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Update Guardian
  * Plugin URI:  https://github.com/haijun954-blip/update-guardian
- * Description: 在 WordPress 插件更新前自动备份，更新后识别异常，并支持一键回滚。
+ * Description: Snapshot plugin updates, detect likely regressions, and restore the previous version with one click.
  * Version:     0.1.0
  * Requires at least: 6.0
  * Requires PHP: 7.4

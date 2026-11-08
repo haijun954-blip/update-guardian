@@ -77,7 +77,7 @@ class Update_Guardian_Repository {
 		);
 
 		if ( false === $result ) {
-			return new WP_Error( 'update_guardian_db_error', __( '无法保存更新记录。', 'update-guardian' ) );
+			return new WP_Error( 'update_guardian_db_error', __( 'Could not save the update record.', 'update-guardian' ) );
 		}
 
 		return (int) $wpdb->insert_id;
